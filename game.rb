@@ -3,15 +3,50 @@ require 'pry'
 class Game
   def initialize
     @game_board = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    @player_type = "X"
+    @current_player = "X"
     @play_count = 1
   end
 
-  def next_player
+  # Ask user input
+  def play
+    while playable?
+      turn
+    end
+
+    if winner
+      # Show winner and message
+      display_board
+      puts "Congratulations! #{winner} won!"
+    elsif draw
+      display_board
+      # Show draw message
+      puts "Cat's game!"
+    end
+    puts "Thank you for playing!"
+  end
+
+  private
+
+  def turn
+    puts "Player: #{@current_player}: Please select the number"
+    display_board
+    # Gets input from user
+    user_input_idx = gets.strip.to_i - 1
+    # If input is valid, then save input to the gaming board
+
+    if valid_move?(user_input_idx)
+      move(user_input_idx)
+      # # Change player type and continue play
+    else
+      play
+    end
+  end
+
+  def next_player(current_player)
     {
       "X" => "O",
       "O" => "X"
-    }
+    }[current_player]
   end
 
   # Display 3x3 board
@@ -28,39 +63,22 @@ class Game
     nil
   end
 
-  # Ask user input
-  def play
-    # Check if board is still playable by checking if there are empty cells available
-    while playable?
-      display_board
-      puts "Round #{@play_count}: Please select the number"
-      # Gets input from user
-      user_input_idx = gets.strip.to_i - 1
-      # If input is valid, then save input to the gaming board
-      if input_valid?(user_input_idx) & board_empty?(user_input_idx)
-        @game_board[user_input_idx] = @player_type
+  def valid_move?(user_input_idx)
+    input_valid?(user_input_idx) & board_empty?(user_input_idx)
+  end
 
-        if winner
-          puts "Congratulations! #{@player_type} won!"
-          break
-          return
-        end
-        # Change player type and continue play
-        switch_player
-        @play_count += 1
-        play
-      else
-        play
-      end
-    end
+  def move(user_input_idx)
+    @game_board[user_input_idx] = @current_player
+    switch_player
+    @play_count += 1
   end
 
   def playable?
-    @play_count <= @game_board.length && !winner
+    @play_count <= @game_board.length && !winner && !draw
   end
 
   def switch_player
-    @player_type = next_player[@player_type]
+    @current_player = next_player(@current_player)
   end
 
   # Input needs to be between 1 - 9
@@ -106,6 +124,20 @@ class Game
       end
     end
     nil
+  end
+
+  def draw
+    if !winner & board_full?
+      true
+    elsif !winner || !board_full?
+      false
+    else
+      winner
+    end
+  end
+
+  def board_full?
+    @game_board.all? { |i| i == "X" || i == "O" }
   end
 
   # Let CPU to input response
