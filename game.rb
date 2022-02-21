@@ -4,7 +4,6 @@ require_relative 'player'
 class Game
   def initialize
     @game_board = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    @play_count = 1
     @player_1 = nil
     @player_2 = nil
   end
@@ -47,12 +46,14 @@ class Game
     display_board
     # Gets input from user
     user_input_idx = gets.strip.to_i - 1
-    # If input is valid, then save input to the gaming board
 
     if valid_move?(user_input_idx)
+      # If input is valid, then save input to the gaming board
       move(user_input_idx)
-      # # Change player type and continue play
+      # Then switch current player
+      switch_player
     else
+      # If invalid input, ask for input again
       play
     end
   end
@@ -84,12 +85,10 @@ class Game
 
   def move(user_input_idx)
     @game_board[user_input_idx] = @current_player.symbol
-    switch_player
-    @play_count += 1
   end
 
   def playable?
-    @play_count <= @game_board.length && !winner && !draw
+    !board_full? && !winner && !draw
   end
 
   def switch_player
@@ -115,20 +114,17 @@ class Game
     end
   end
 
-  # Input have to be either o or x
-
-  # Display user input on the gaming board
   # Check if player wins
   def winner
     lines = [
-      [0, 1, 2], # 横1列目
-      [3, 4, 5], # 横2列目
-      [6, 7, 8], # 横3列目
-      [0, 3, 6], # 縦1列目
-      [1, 4, 7], # 縦2列目
-      [2, 5, 8], # 縦3列目
-      [0, 4, 8], # 左 -> 右斜め
-      [2, 4, 6], # 右 -> 左斜め
+      [0, 1, 2], # 1st Row
+      [3, 4, 5], # 2nd Row
+      [6, 7, 8], # 3rd Row
+      [0, 3, 6], # 1st Column
+      [1, 4, 7], # 2st Column
+      [2, 5, 8], # 3st Column
+      [0, 4, 8], # Diagonal (Bottom left to top right)
+      [2, 4, 6], # Diagonal (Top right to bottom left)
     ]
 
     lines.each do |line|
@@ -152,7 +148,7 @@ class Game
   end
 
   def board_full?
-    @game_board.all? { |i| i == "X" || i == "O" }
+    @game_board.all? { |i| i == @player_1.symbol || i == @player_2.symbol }
   end
 
   # Let CPU to input response
