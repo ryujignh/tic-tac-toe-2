@@ -1,10 +1,25 @@
 require 'pry'
+require_relative 'player'
 
 class Game
   def initialize
     @game_board = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    @current_player = "X"
     @play_count = 1
+    @player_1 = nil
+    @player_2 = nil
+  end
+
+  def start
+    @player_1 = set_players
+    @player_2 = set_players
+    @current_player = @player_1
+    play
+  end
+
+  def set_players
+    puts "Please enter your symbol"
+    symbol = gets.strip.to_s
+    Player.new(symbol)
   end
 
   # Ask user input
@@ -28,7 +43,7 @@ class Game
   private
 
   def turn
-    puts "Player: #{@current_player}: Please select the number"
+    puts "Player: #{@current_player.symbol}: Please select the number"
     display_board
     # Gets input from user
     user_input_idx = gets.strip.to_i - 1
@@ -44,8 +59,8 @@ class Game
 
   def next_player(current_player)
     {
-      "X" => "O",
-      "O" => "X"
+      @player_1 => @player_2,
+      @player_2 => @player_1,
     }[current_player]
   end
 
@@ -68,7 +83,7 @@ class Game
   end
 
   def move(user_input_idx)
-    @game_board[user_input_idx] = @current_player
+    @game_board[user_input_idx] = @current_player.symbol
     switch_player
     @play_count += 1
   end
@@ -147,4 +162,4 @@ class Game
   # end
 end
 
-Game.new.play
+Game.new.start
